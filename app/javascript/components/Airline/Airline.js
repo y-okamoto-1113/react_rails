@@ -2,6 +2,7 @@ import React, { useState, useEffect, Fragment } from 'react'
 import axios from "axios"
 import Header from "./Header"
 import ReviewForm from "./ReviewForm"
+import Review from './Review'
 import styled from "styled-components"
 
 const Wrapper = styled.div`
@@ -14,10 +15,15 @@ const Wrapper = styled.div`
 const Column = styled.div`
   background: #fff;
   height: 100wh;
+  overflow-x: scroll;
+  overflow-y: scroll;
   overflow: scroll;
-
+  &::-webkit-scrollbar {
+    display: none;
+  }
   &:last-child{
-    background: #000;
+    background: black;
+    border-top: 1px solid rgba(255, 255, 255, 0.5);
   }
 `
 const Main = styled.div`
@@ -60,7 +66,8 @@ const Airline = (props) => {
       axios.post('/api/v1/reviews', {review, airline_id})
       .then(resp => {
         // debugger
-        const included = [...airline.included, resp.data]
+        const included = [...airline.included, resp.data.data]
+        console.log(included)
         setAirline({...airline, included})
         setReview({title: '', descritpion: '', score: 0})
       })
@@ -72,6 +79,18 @@ const Airline = (props) => {
       setReview({...review, score})
     }
 
+    let reviews
+    if (loaded && airline.included){
+      reviews = airline.included.map((item, index) => {
+        console.log('mapping', item)
+        return (
+          <Review
+            key={index}
+            attributes={item.attributes}
+          />
+        )
+      })
+    }
 
     return(
       <Wrapper>
@@ -84,7 +103,7 @@ const Airline = (props) => {
                     attributes={airline.data.attributes}
                     reviews={airline.included}
                   />
-              <div className="reviews"></div>
+              {reviews}
             </Main>
             </Column>
             <Column>
